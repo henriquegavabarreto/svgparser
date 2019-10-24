@@ -27,10 +27,11 @@ function getAllSVGInfo (dirName) {
       charInfo.viewBox = svg.attributes.viewBox
       svg.children[0].children.forEach(layer => {
         // creates a new node for each layer
-        charInfo.layers[layer.attributes.id] = {}
+        charInfo.layers[layer.attributes.id] = []
         layer.children.forEach(path => {
           let pathInfo = {}
           pathInfo.d = path.attributes.d
+          pathInfo.id = path.attributes.id
           pathInfo.strokeWidth = path.attributes['stroke-width']
           let properties = pathProps.svgPathProperties(pathInfo.d)
           // gets parts from properties
@@ -41,7 +42,7 @@ function getAllSVGInfo (dirName) {
             pathInfo.startPoint = lineParts[0].start
             pathInfo.endPoint = lineParts[lineParts.length - 1].end
           }
-          charInfo.layers[layer.attributes.id][path.attributes.id] = pathInfo
+          charInfo.layers[layer.attributes.id].splice(parseInt(pathInfo.id.replace(/[^0-9]/g,'')) - 1, 0, pathInfo)
         })
       })
       let character = filenames[i].replace('.svg', '')
