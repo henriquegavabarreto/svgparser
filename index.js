@@ -30,27 +30,34 @@ function getAllSVGInfo (dirName) {
         charInfo.layers[layer.attributes.id] = []
         layer.children.forEach(path => {
           let pathInfo = {}
+          // get d and id from all paths
           pathInfo.d = path.attributes.d
           pathInfo.id = path.attributes.id
-          pathInfo.strokeWidth = path.attributes['stroke-width']
-          let properties = pathProps.svgPathProperties(pathInfo.d)
-          // gets parts from properties
-          let lineParts = properties.getParts()
-          pathInfo.totalLength = properties.getTotalLength()
-          // only get start and end points from interactiveStrokes layer
+          // only get start and end points, strokeWidth and total length from interactiveStrokes layer
           if (layer.attributes.id === 'interactiveStrokes') {
+            let properties = pathProps.svgPathProperties(pathInfo.d)
+            // gets parts from properties
+            let lineParts = properties.getParts()
+            pathInfo.strokeWidth = path.attributes['stroke-width']
+            pathInfo.totalLength = properties.getTotalLength()
             pathInfo.startPoint = lineParts[0].start
             pathInfo.endPoint = lineParts[lineParts.length - 1].end
           }
+          // splice the stroke information to be in the correct stroke order - according to svg id parameters
           charInfo.layers[layer.attributes.id].splice(parseInt(pathInfo.id.replace(/[^0-9]/g,'')) - 1, 0, pathInfo)
         })
       })
+      // character will be the file name without extension
       let character = filenames[i].replace('.svg', '')
       data[character] = charInfo
     })
-    let output = JSON.stringify(data, null, 2)
+    // save smaller hard-to-read JSON for use and an easy-to-read one
+    let readableOutput = JSON.stringify(data, null, 2)
+    let output = JSON.stringify(data)
     fs.writeFileSync(`${dirName}.json`, output)
-    console.log('File Saved!')
+    console.log(`Saved ${dirName}.json!`)
+    fs.writeFileSync(`readable${dirName}.json`, readableOutput)
+    console.log(`Saved readable${dirName}.json!`)
   }).catch(err => console.log(err))
 }
 
