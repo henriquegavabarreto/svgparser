@@ -10,12 +10,12 @@ function getAllSVGInfo (dirName) {
   let data = {}
   let promiseArray = []
   // reads directory and get all file names
-  let filenames = fs.readdirSync(dirName)
+  let filenames = fs.readdirSync(`input/${dirName}`)
   filenames.forEach(filename => {
     // Expects the character to be the file name without extension
     let character = filename.replace('.svg', '')
     // read file and get content
-    let fileContent = fs.readFileSync(`./${dirName}/${filename}`, 'utf-8')
+    let fileContent = fs.readFileSync(`./input/${dirName}/${filename}`, 'utf-8')
     // push svgson parsing to the promise array
     promiseArray.push(svgson.parse(fileContent))
   })
@@ -54,9 +54,9 @@ function getAllSVGInfo (dirName) {
     // save smaller hard-to-read JSON for use and an easy-to-read one
     let readableOutput = JSON.stringify(data, null, 2)
     let output = JSON.stringify(data)
-    fs.writeFileSync(`${dirName}.json`, output)
+    fs.writeFileSync(`output/${dirName}.json`, output)
     console.log(`Saved ${dirName}.json!`)
-    fs.writeFileSync(`readable${dirName}.json`, readableOutput)
+    fs.writeFileSync(`output/readable${dirName}.json`, readableOutput)
     console.log(`Saved readable${dirName}.json!`)
   }).catch(err => console.log(err))
 }

@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
-/hiragana
+/input
+/output
 *.json
 
 # local env files
