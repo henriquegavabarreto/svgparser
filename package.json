@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "svg-path-properties": "^0.5.2",
+    "svg.js": "^2.7.1",
+    "svgdom": "0.0.20",
     "svgson": "^4.0.0"
   }
 }

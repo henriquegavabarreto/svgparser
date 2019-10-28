@@ -1,6 +1,12 @@
 const svgson = require('svgson')
 const fs = require('fs')
 const pathProps = require('svg-path-properties')
+const window = require('svgdom')
+const SVG = require('svg.js')(window)
+const document = window.document
+// create svg.js instance
+const canvas = SVG(document.documentElement)
+
 // Expects svg sports to be Figma svg exports - viewbox seems to be always 0 0 imageWidth imageHeight (0 0 as the start)
 // TODO: Maybe add a border around the svg viewbox
 
@@ -41,6 +47,8 @@ function getAllSVGInfo (dirName) {
             pathInfo.strokeWidth = path.attributes['stroke-width']
             pathInfo.totalLength = properties.getTotalLength()
             pathInfo.startPoint = lineParts[0].start
+            // gets curves to make comparison to drawing
+            pathInfo.curve = getCurve(canvas.path(pathInfo.d), 50)
             pathInfo.endPoint = lineParts[lineParts.length - 1].end
           }
           // splice the stroke information to be in the correct stroke order - according to svg id parameters
@@ -59,6 +67,16 @@ function getAllSVGInfo (dirName) {
     fs.writeFileSync(`output/readable${dirName}.json`, readableOutput)
     console.log(`Saved readable${dirName}.json!`)
   }).catch(err => console.log(err))
+}
+
+// function to get curve
+function getCurve (svgPath, n = 50) { // parameters are a SVGjs path and number of points to be get that defaults to 50
+  let curve = []
+  for (let i = 1; i <= n; i++) {
+    let point = svgPath.pointAt(svgPath.length() * (i / n))
+    curve.push({ x: point.x, y: point.y })
+  }
+  return curve
 }
 
 getAllSVGInfo('hiragana')
