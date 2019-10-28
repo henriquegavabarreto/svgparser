@@ -4,6 +4,7 @@ const pathProps = require('svg-path-properties')
 const window = require('svgdom')
 const SVG = require('svg.js')(window)
 const document = window.document
+const pathManipulator = require('svgpath')
 // create svg.js instance
 const canvas = SVG(document.documentElement)
 
@@ -11,7 +12,8 @@ const canvas = SVG(document.documentElement)
 // TODO: Maybe add a border around the svg viewbox
 
 // gets all svg info from files in a directory and save it
-function getAllSVGInfo (dirName) {
+// Takes the directory name from input, if it needs to be minified and number of curvePoints to get
+function getAllSVGInfo (dirName, minify = false, curvePoints = 50) {
   // object that will hold all the relevant data
   let data = {}
   let promiseArray = []
@@ -36,8 +38,13 @@ function getAllSVGInfo (dirName) {
         charInfo.layers[layer.attributes.id] = []
         layer.children.forEach(path => {
           let pathInfo = {}
-          // get d and id from all paths
-          pathInfo.d = path.attributes.d
+          // round d to two decimals if minify is true
+          if (minify) {
+            pathInfo.d = pathManipulator(path.attributes.d).round(2).toString()
+          } else {
+            pathInfo.d = path.attributes.d
+          }
+          // get id from all paths
           pathInfo.id = path.attributes.id
           // only get start and end points, strokeWidth and total length from interactiveStrokes layer
           if (layer.attributes.id === 'interactiveStrokes') {
@@ -48,7 +55,7 @@ function getAllSVGInfo (dirName) {
             pathInfo.totalLength = properties.getTotalLength()
             pathInfo.startPoint = lineParts[0].start
             // gets curves to make comparison to drawing
-            pathInfo.curve = getCurve(canvas.path(pathInfo.d), 50)
+            pathInfo.curve = getCurve(canvas.path(pathInfo.d), curvePoints)
             pathInfo.endPoint = lineParts[lineParts.length - 1].end
           }
           // splice the stroke information to be in the correct stroke order - according to svg id parameters

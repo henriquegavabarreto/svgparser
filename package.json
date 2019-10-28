@@ -12,6 +12,7 @@
     "svg-path-properties": "^0.5.2",
     "svg.js": "^2.7.1",
     "svgdom": "0.0.20",
+    "svgpath": "^2.2.2",
     "svgson": "^4.0.0"
   }
 }
