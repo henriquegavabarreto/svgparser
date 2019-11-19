@@ -13,7 +13,7 @@ const canvas = SVG(document.documentElement)
 
 // gets all svg info from files in a directory and save it
 // Takes the directory name from input, if it needs to be minified and number of curvePoints to get
-function getAllSVGInfo (dirName, minify = false, curvePoints = 50) {
+function getAllSVGInfo (dirName, paddingValue = null, minify = false, curvePoints = 50) {
   // object that will hold all the relevant data
   let data = {}
   let promiseArray = []
@@ -32,7 +32,17 @@ function getAllSVGInfo (dirName, minify = false, curvePoints = 50) {
     svgs.forEach((svg, i) => {
       let charInfo = {}
       charInfo.layers = {}
-      charInfo.viewBox = svg.attributes.viewBox
+      // add padding if passed in the parameters
+      if (paddingValue) {
+        let vB = svg.attributes.viewBox.split(' ')
+        vB[0] = parseInt(vB[0]) - paddingValue
+        vB[1] = parseInt(vB[1]) - paddingValue
+        vB[2] = parseInt(vB[2]) + (paddingValue * 2)
+        vB[3] = parseInt(vB[3]) + (paddingValue * 2)
+        charInfo.viewBox = vB.join(' ')
+      } else {
+        charInfo.viewBox = svg.attributes.viewBox
+      }
       svg.children[0].children.forEach(layer => {
         // creates a new node for each layer
         charInfo.layers[layer.attributes.id] = []
@@ -86,4 +96,5 @@ function getCurve (svgPath, n = 50) { // parameters are a SVGjs path and number 
   return curve
 }
 
-getAllSVGInfo('hiragana')
+// this should get all the folders on the input and export to their own json files
+getAllSVGInfo('hiraganav2', 5)
