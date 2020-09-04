@@ -7,13 +7,17 @@ const document = window.document
 const pathManipulator = require('svgpath')
 // create svg.js instance
 const canvas = SVG(document.documentElement)
+const readline = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+})
 
 // Expects svg sports to be Figma svg exports - viewbox seems to be always 0 0 imageWidth imageHeight (0 0 as the start)
 // TODO: Maybe add a border around the svg viewbox
 
 // gets all svg info from files in a directory and save it
 // Takes the directory name from input, if it needs to be minified and number of curvePoints to get
-function getAllSVGInfo (dirName, paddingValue = null, minify = false, curvePoints = 50) {
+function getAllSVGInfo (dirName, outputName, paddingValue = null, minify = false, curvePoints = 50) {
   // object that will hold all the relevant data
   let data = {}
   let promiseArray = []
@@ -79,10 +83,10 @@ function getAllSVGInfo (dirName, paddingValue = null, minify = false, curvePoint
     // save smaller hard-to-read JSON for use and an easy-to-read one
     let readableOutput = JSON.stringify(data, null, 2)
     let output = JSON.stringify(data)
-    fs.writeFileSync(`output/${dirName}.json`, output)
-    console.log(`Saved ${dirName}.json!`)
-    fs.writeFileSync(`output/readable${dirName}.json`, readableOutput)
-    console.log(`Saved readable${dirName}.json!`)
+    fs.writeFileSync(`output/${outputName}.json`, output)
+    console.log(`Saved ${outputName}.json!`)
+    fs.writeFileSync(`output/readable${outputName}.json`, readableOutput)
+    console.log(`Saved readable${outputName}.json!`)
   }).catch(err => console.log(err))
 }
 
@@ -96,5 +100,50 @@ function getCurve (svgPath, n = 50) { // parameters are a SVGjs path and number 
   return curve
 }
 
+readline.question(`Directory name with files to parse: `, (dirName) => {
+  readline.question(`Name of the output JSON file: `, (outputName) => {
+    readline.question(`Padding value (optional - integer): `, (paddingValue) => {
+      readline.question(`Minify (y/n): `, (minify) => {
+        readline.question(`Number of curve points (optional - defaults to 50) `, (curvePoints) => {
+          // check if directory is valid
+          if (dirName === '' || !fs.existsSync(`input/${dirName}`)) {
+            console.log('This is not a valid directory.')
+            process.exit()
+          }
+          
+          if (outputName === '') {
+            outputName = 'myDefaultFileName'
+          }
+          
+          // parse paddingValue (defaults to null if padding value is not valid)
+          if (paddingValue === '' || isNaN(parseInt(paddingValue))) {
+            paddingValue = null
+          } else {
+            paddingValue = parseInt(paddingValue)
+          }
+          
+          // parse minify to true or false
+          if (minify.trim() === 'y') {
+            minify = true
+          } else {
+            minify = false
+          }
+          
+          // parse curvePoints (defaults to 50 if value is not valid)
+          if (curvePoints === '' || isNaN(parseInt(curvePoints))) {
+            curvePoints = 50
+          } else {
+            curvePoints = parseInt(curvePoints)
+          }
+          
+          readline.close()
+          
+          getAllSVGInfo(dirName, outputName, paddingValue, minify, curvePoints)
+        })
+      })
+    })
+  })
+})
+
 // this should get all the folders on the input and export to their own json files
-getAllSVGInfo('hiraganav2', 5)
+// getAllSVGInfo('hiraganav2', 5)
